@@ -30,3 +30,6 @@ Makefile
 
 # Executables
 *.exe
+
+research/
+AGENTS.MD
