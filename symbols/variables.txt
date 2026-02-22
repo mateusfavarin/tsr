@@ -1,0 +1,1 @@
+g_heapStart = 0x800ac0d0;

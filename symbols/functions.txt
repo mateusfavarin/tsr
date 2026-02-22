@@ -1,0 +1,4 @@
+Heap_MergeFreeBlocks = 0x80040044;
+
+memset = 0x800878bc;
+printf = 0x800878dc;
