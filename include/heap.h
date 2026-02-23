@@ -20,5 +20,3 @@ typedef struct HeapBlock
 
 HeapBlock* Heap_Alloc(u16 words, void** owner);
 HeapBlock* Heap_MergeFreeBlocks(u16 words);
-
-extern HeapBlock g_heapStart;

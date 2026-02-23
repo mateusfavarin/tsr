@@ -2,3 +2,5 @@ ntsc_u, decomp, 0x80200000, 0x0, src/*.c
 
 ntsc_u, exe, 0x80040178, 0x0, hooks/heap_alloc.s
 ntsc_u, exe, 0x80040044, 0x0, hooks/heap_merge.s
+ntsc_u, exe, 0x8005be80, 0x0, hooks/axe_parse.s
+ntsc_u, exe, 0x80011c18, 0x0, hooks/axe_render.s

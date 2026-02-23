@@ -1,1 +1,14 @@
 g_heapStart = 0x800ac0d0;
+g_axeChunkCount = 0x800a92c0;
+g_axeChunkStream = 0x800a92a4;
+g_axeSkipFaceSize = 0x800a93e4;
+g_axePtrSkipFaceSize = 0x800a9278;
+g_ptrAxe = 0x800a927c;
+g_activeViewport_ClipMinX = 0x800a94a6;
+g_activeViewport_ClipMinY = 0x800a94a8;
+g_activeViewport_ClipMaxX = 0x800a94ac;
+g_activeViewport_ClipMaxY = 0x800a94b0;
+g_primMem = 0x800a94ec;
+g_otPtr = 0x800a90b0;
+g_primMemEnd = 0x800a9398;
+g_axeScratchpadDataBeg = 0x1f800020;
