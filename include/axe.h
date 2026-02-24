@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "math.h"
+#include "geom.h"
 #include "prim.h"
 
 typedef struct AxeOcclusionQuad
