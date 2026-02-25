@@ -39,10 +39,10 @@ static force_inline bool Sprite_HasAnyVisibleScreenPointY(const PointQuad *scree
 
 static force_inline bool Sprite_HasAnyVisibleScreenPointX(const PointQuad *screenPoints)
 {
-    if ((u16) screenPoints->p[0].x < GRAPHICS_SCREEN_WIDTH) { return true; }
-    if ((u16) screenPoints->p[1].x < GRAPHICS_SCREEN_WIDTH) { return true; }
-    if ((u16) screenPoints->p[2].x < GRAPHICS_SCREEN_WIDTH) { return true; }
-    return (u16) screenPoints->p[3].x < GRAPHICS_SCREEN_WIDTH;
+    if (screenPoints->p[0].x < GRAPHICS_SCREEN_WIDTH) { return true; }
+    if (screenPoints->p[1].x < GRAPHICS_SCREEN_WIDTH) { return true; }
+    if (screenPoints->p[2].x < GRAPHICS_SCREEN_WIDTH) { return true; }
+    return screenPoints->p[3].x < GRAPHICS_SCREEN_WIDTH;
 }
 
 static void Sprite_BuildCorners(const Sprite *sprite, PointQuad *corners)
