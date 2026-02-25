@@ -13,7 +13,7 @@ void Geom_ApplyVectorTransform_InPlace(const Vec3 *input, Vec3 *output)
     gte_llirbk();
 
     *output = GTE_ReadMac();
-    gte_ldtr(output->x, output->y, output->z);
+    gte_SetTransVector(output);
 }
 
 void Geom_ApplyMatrixScaleTransform_InPlace(const SVec3 *scale, const Mat3 *source, Mat3 *destination)
