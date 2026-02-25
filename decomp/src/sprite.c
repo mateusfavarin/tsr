@@ -129,9 +129,9 @@ static void Sprite_BuildRotationMatrix(u16 angle, s32 spriteYScale, Mat3 *rotati
         return;
     }
 
-    const s32 sinQuarter = ((s32) g_sinTable[sinAngle]) >> 2; const s32 cosQuarter = ((s32) g_sinTable[cosAngle]) >> 2;
-    const s32 sinEighth = ((s32) g_sinTable[sinAngle]) >> 3; const s32 cosEighth = ((s32) g_sinTable[cosAngle]) >> 3;
-    const s16 sinBlend = (s16) ANG_SUM(sinEighth, sinQuarter); const s16 cosBlend = (s16) ANG_SUM(cosEighth, cosQuarter);
+    const s16 sinQuarter = g_sinTable[sinAngle] >> 2; const s16 cosQuarter = g_sinTable[cosAngle] >> 2;
+    const s16 sinEighth = g_sinTable[sinAngle] >> 3; const s16 cosEighth = g_sinTable[cosAngle] >> 3;
+    const s16 sinBlend = sinEighth + sinQuarter; const s16 cosBlend = cosEighth + cosQuarter;
 
     s32 scaledSinQuarter = sinQuarter;
     s32 scaledCosQuarter = cosQuarter;
@@ -142,8 +142,8 @@ static void Sprite_BuildRotationMatrix(u16 angle, s32 spriteYScale, Mat3 *rotati
         scaledCosQuarter = FP_MULT(cosQuarter, spriteYScale);
     }
 
-    rotation->m[0][0] = (s16) (~(u16) sinBlend); rotation->m[0][1] = cosBlend; rotation->m[0][2] = (s16) scaledSinQuarter;
-    rotation->m[1][0] = 0; rotation->m[1][1] = (s16) scaledCosQuarter; rotation->m[1][2] = 0;
+    rotation->m[0][0] = -sinBlend; rotation->m[0][1] = cosBlend; rotation->m[0][2] = 0;
+    rotation->m[1][0] = scaledSinQuarter; rotation->m[1][1] = scaledCosQuarter; rotation->m[1][2] = 0;
     rotation->m[2][0] = 0; rotation->m[2][1] = 0; rotation->m[2][2] = FP_ONE;
 }
 
@@ -204,7 +204,7 @@ void Sprite_RenderQueue(Sprite *sprites, s32 count)
         if (depthByteOffset < 0) { depthByteOffset = 0; }
         if (depthByteOffset >= depthLimitBytes) { continue; }
 
-        const u16 otOffset = g_depthToOTDepthLUT[(u32) depthByteOffset >> 1];
+        const u16 otOffset = g_depthToOTDepthLUT[(u32) (depthByteOffset >> 2)];
         u32 *otTagPtr = (u32 *) (g_otPtr + otOffset);
         u32 otTag = *otTagPtr;
         PolyFT4 *prim = (PolyFT4 *) g_primMem;

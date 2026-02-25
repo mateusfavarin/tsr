@@ -8,7 +8,6 @@
 #define ANG_MODULO_TWO_PI(x) ((x) & (ANG_TWO_PI - 1))   // ang % 360
 #define ANG_MODULO_PI(x) ((x) & (ANG_PI - 1))           // ang % 180
 #define ANG_MODULO_HALF_PI(x) ((x) & (ANG_HALF_PI - 1)) // ang % 90
-#define ANG_SUM(x, y) ANG_MODULO_TWO_PI(((x) + (y)))
 
 #define ANG(x) ANG_MODULO_TWO_PI(((short)((((float) x) * ANG_TWO_PI) / 360))) // works for any float, pos or neg
 
