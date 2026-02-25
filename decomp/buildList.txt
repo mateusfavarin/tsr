@@ -9,3 +9,4 @@ ntsc_u, exe, 0x80010c60, 0x0, hooks/geom_mtip.s
 ntsc_u, exe, 0x800109a4, 0x0, hooks/geom_mstip.s
 ntsc_u, exe, 0x800107ac, 0x0, hooks/geom_vtip.s
 ntsc_u, exe, 0x80010584, 0x0, hooks/geom_loadmv.s
+ntsc_u, exe, 0x80012040, 0x0, hooks/sprite_render.s

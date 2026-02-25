@@ -110,7 +110,7 @@ typedef union Point
         s16 x;
         s16 y;
     };
-    s32 self;
+    u32 self;
 } Point;
 
 #define MakePoint(px, py) (Point) { .x = px, .y = py }
@@ -269,6 +269,7 @@ typedef struct PolyFT4
 #define polyTpage v[1].tpage
 
 #define PrimSize(P) ((sizeof(*P) - sizeof(Tag)) / sizeof(u32))
+#define SetPrimTag(PRIM, TAG) do { (PRIM)->tag.addr = (TAG); (TAG) = ((u32) (uintptr_t) (PRIM)) & 0x00FFFFFFU; (PRIM)->tag.size = PrimSize((PRIM)); } while (0)
 
 static force_inline void Prim_SetPolyG4(PrimCode *code)
 {

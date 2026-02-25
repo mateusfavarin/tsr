@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nugget/inline_n.h"
+#include "geom.h"
 
 typedef enum GTE_ROW_INDEX
 {
@@ -104,25 +105,32 @@ typedef enum GTE_CALC
 #define gte_interpolateBase(out, calcType) CAT(_gte_interpolateBase_, calcType)(); _gte_readMac_GTE_VECTOR_MAC(out)
 #define gte_crossProduct(out, matrix, vector) gte_SetRotMatrix(matrix); gte_loadSVec(vector, GTE_VECTOR_IR); gte_op0(); gte_readMac(out, GTE_VECTOR_MAC)
 
-static force_inline s32 GTE_ReadSxy0()
+static force_inline Point GTE_ReadSxy0()
 {
-    s32 sxy;
-    gte_stsxy0(&sxy);
-    return sxy;
+    Point point;
+    gte_stsxy0(&point.self);
+    return point;
 }
 
-static force_inline s32 GTE_ReadSxy1()
+static force_inline Point GTE_ReadSxy1()
 {
-    s32 sxy;
-    gte_stsxy1(&sxy);
-    return sxy;
+    Point point;
+    gte_stsxy1(&point.self);
+    return point;
 }
 
-static force_inline s32 GTE_ReadSxy2()
+static force_inline Point GTE_ReadSxy2()
 {
-    s32 sxy;
-    gte_stsxy2(&sxy);
-    return sxy;
+    Point point;
+    gte_stsxy2(&point.self);
+    return point;
+}
+
+static force_inline void GTE_ReadSxyVec(Point *points)
+{
+    points[0] = GTE_ReadSxy0();
+    points[1] = GTE_ReadSxy1();
+    points[2] = GTE_ReadSxy2();
 }
 
 static force_inline s32 GTE_ReadOtz()

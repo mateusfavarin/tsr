@@ -1,6 +1,12 @@
 #pragma once
 
 #include "types.h"
+#include "prim.h"
+
+typedef struct PointQuad
+{
+    Point p[4];
+} PointQuad;
 
 typedef union SVec3
 {

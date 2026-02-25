@@ -9,7 +9,7 @@ typedef struct BlockHeader
 {
     u16 isInUse;
     u16 sizeWords; // 1 word = 2 bytes
-    void** owner;
+    void **owner;
 } BlockHeader;
 
 typedef struct HeapBlock
@@ -18,5 +18,5 @@ typedef struct HeapBlock
     u16 payload[];
 } HeapBlock;
 
-HeapBlock* Heap_Alloc(u16 words, void** owner);
-HeapBlock* Heap_MergeFreeBlocks(u16 words);
+HeapBlock *Heap_Alloc(u16 words, void** owner);
+HeapBlock *Heap_MergeFreeBlocks(u16 words);
