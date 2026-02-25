@@ -7,6 +7,7 @@ typedef enum GraphicsOtOffset
 
 typedef enum GraphicsScreenDimension
 {
+    GRAPHICS_SCREEN_HEIGHT = 0xF0,
     GRAPHICS_SCREEN_WIDTH = 0x200,
 } GraphicsScreenDimension;
 

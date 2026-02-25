@@ -6,7 +6,6 @@
 
 typedef enum SpriteConstants
 {
-    SPRITE_PROJ_VALID_LIMIT = 0x00F00000,
     SPRITE_NEGATE_LOW_WORD = 0x0000FFFF,
     SPRITE_NEGATE_HIGH_WORD = 0xFFFF0000,
     SPRITE_NEGATE_BOTH_WORDS = 0xFFFFFFFF,
@@ -30,12 +29,12 @@ static force_inline SVec3 Sprite_PackedXYToVec(Point point)
     return out;
 }
 
-static force_inline bool Sprite_HasAnyProjectedScreenPoint(const PointQuad *screenPoints)
+static force_inline bool Sprite_HasAnyVisibleScreenPointY(const PointQuad *screenPoints)
 {
-    if (screenPoints->p[0].self < SPRITE_PROJ_VALID_LIMIT) { return true; }
-    if (screenPoints->p[1].self < SPRITE_PROJ_VALID_LIMIT) { return true; }
-    if (screenPoints->p[2].self < SPRITE_PROJ_VALID_LIMIT) { return true; }
-    return screenPoints->p[3].self < SPRITE_PROJ_VALID_LIMIT;
+    if (screenPoints->p[0].y < GRAPHICS_SCREEN_HEIGHT) { return true; }
+    if (screenPoints->p[1].y < GRAPHICS_SCREEN_HEIGHT) { return true; }
+    if (screenPoints->p[2].y < GRAPHICS_SCREEN_HEIGHT) { return true; }
+    return screenPoints->p[3].y < GRAPHICS_SCREEN_HEIGHT;
 }
 
 static force_inline bool Sprite_HasAnyVisibleScreenPointX(const PointQuad *screenPoints)
@@ -142,7 +141,7 @@ static void Sprite_BuildRotationMatrix(u16 angle, s32 spriteYScale, Mat3 *rotati
         scaledCosQuarter = FP_MULT(cosQuarter, spriteYScale);
     }
 
-    rotation->m[0][0] = -sinBlend; rotation->m[0][1] = cosBlend; rotation->m[0][2] = 0;
+    rotation->m[0][0] = cosBlend; rotation->m[0][1] = -sinBlend; rotation->m[0][2] = 0;
     rotation->m[1][0] = scaledSinQuarter; rotation->m[1][1] = scaledCosQuarter; rotation->m[1][2] = 0;
     rotation->m[2][0] = 0; rotation->m[2][1] = 0; rotation->m[2][2] = FP_ONE;
 }
@@ -189,7 +188,7 @@ void Sprite_RenderQueue(Sprite *sprites, s32 count)
 
         screenPoints.p[3] = GTE_ReadSxy2();
 
-        if (!Sprite_HasAnyProjectedScreenPoint(&screenPoints)) { continue; }
+        if (!Sprite_HasAnyVisibleScreenPointY(&screenPoints)) { continue; }
 
         gte_avsz4_b();
         const s32 otz = GTE_ReadOtz();
