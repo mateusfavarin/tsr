@@ -3,7 +3,7 @@
 #include <stdint-gcc.h>
 #include <stdbool.h>
 
-#define force_inline static inline __attribute__((always_inline))
+#define force_inline inline __attribute__((always_inline))
 #define nullptr ((void *) 0)
 
 typedef uint64_t u64;

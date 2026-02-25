@@ -104,30 +104,37 @@ typedef enum GTE_CALC
 #define gte_interpolateBase(out, calcType) CAT(_gte_interpolateBase_, calcType)(); _gte_readMac_GTE_VECTOR_MAC(out)
 #define gte_crossProduct(out, matrix, vector) gte_SetRotMatrix(matrix); gte_loadSVec(vector, GTE_VECTOR_IR); gte_op0(); gte_readMac(out, GTE_VECTOR_MAC)
 
-static inline s32 GTE_ReadSxy0()
+static force_inline s32 GTE_ReadSxy0()
 {
     s32 sxy;
     gte_stsxy0(&sxy);
     return sxy;
 }
 
-static inline s32 GTE_ReadSxy1()
+static force_inline s32 GTE_ReadSxy1()
 {
     s32 sxy;
     gte_stsxy1(&sxy);
     return sxy;
 }
 
-static inline s32 GTE_ReadSxy2()
+static force_inline s32 GTE_ReadSxy2()
 {
     s32 sxy;
     gte_stsxy2(&sxy);
     return sxy;
 }
 
-static inline s32 GTE_ReadOtz()
+static force_inline s32 GTE_ReadOtz()
 {
     s32 otz;
     gte_stotz(&otz);
     return otz;
+}
+
+static force_inline Vec3 GTE_ReadMac()
+{
+    Vec3 value;
+    gte_readMac(&value, GTE_VECTOR_MAC);
+    return value;
 }

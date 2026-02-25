@@ -270,7 +270,7 @@ typedef struct PolyFT4
 
 #define PrimSize(P) ((sizeof(*P) - sizeof(Tag)) / sizeof(u32))
 
-static inline void Prim_SetPolyG4(PrimCode *code)
+static force_inline void Prim_SetPolyG4(PrimCode *code)
 {
     code->poly.rawTex = 0;
     code->poly.semiTransparency = 0;
