@@ -146,7 +146,7 @@ static void Sprite_BuildRotationMatrix(u16 angle, s32 spriteYScale, Mat3 *rotati
     rotation->m[2][0] = 0; rotation->m[2][1] = 0; rotation->m[2][2] = FP_ONE;
 }
 
-void Sprite_RenderQueue(Sprite *sprites, s32 count)
+void Sprite_RenderQueue(const Sprite *sprites, s32 count)
 {
     const s32 spriteYScale = (s32) g_spriteYScale;
     const s32 depthLimitBytes = g_otDepthLimit << 2;

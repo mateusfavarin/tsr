@@ -21,6 +21,6 @@ typedef struct Sprite
     ColorCode color;
 } Sprite;
 
-void Sprite_RenderQueue(Sprite *sprites, s32 count);
+void Sprite_RenderQueue(const Sprite *sprites, s32 count);
 void Sprite_ClearQueue();
 void Sprite_FlushQueue();
