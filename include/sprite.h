@@ -1,8 +1,8 @@
 #pragma once
 
-#include <types.h>
-#include <geom.h>
-#include <prim.h>
+#include "types.h"
+#include "geom.h"
+#include "prim.h"
 
 typedef struct Sprite
 {

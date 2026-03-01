@@ -2,7 +2,7 @@
 #include <inline_gte.h>
 #include <extern.h>
 #include <graphics.h>
-#include "math.h"
+#include <math.h>
 
 typedef enum SpriteConstants
 {
