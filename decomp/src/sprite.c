@@ -209,12 +209,9 @@ void Sprite_RenderQueue(const Sprite *sprites, s32 count)
         PolyFT4 *prim = (PolyFT4 *) g_primMem;
 
         const u8 u0 = sprite->uv.u; const u8 v0 = sprite->uv.v;
-        const u8 u1 = (u8) (u0 + sprite->texWidth);
-        const u8 v1 = v0;
-        const u8 u2 = u0;
-        const u8 v2 = (u8) (v0 + sprite->texHeight);
-        const u8 u3 = u1;
-        const u8 v3 = v2;
+        const u8 u1 = u0 + sprite->texWidth; const u8 v1 = v0;
+        const u8 u2 = u0; const u8 v2 = v0 + sprite->texHeight;
+        const u8 u3 = u1; const u8 v3 = v2;
 
         prim->v[0].pos = screenPoints.p[0]; prim->v[1].pos = screenPoints.p[2];
         prim->v[2].pos = screenPoints.p[3]; prim->v[3].pos = screenPoints.p[1];
