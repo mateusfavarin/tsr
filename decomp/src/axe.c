@@ -154,7 +154,6 @@ void Axe_ParseHeader()
     for (s32 chunkIndex = 0; chunkIndex < g_axeChunkCount; chunkIndex++, chunk++)
     {
         chunk->pVertices = (AxeVertex *) (axeBase + (uintptr_t) chunk->pVertices);
-        chunk->field_0x08 = (u32) ((uintptr_t) axeBase + chunk->field_0x08);
         chunk->pFace = (AxeFace *) (axeBase + (uintptr_t) chunk->pFace);
     }
 
