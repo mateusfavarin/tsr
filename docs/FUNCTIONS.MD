@@ -2,6 +2,10 @@
 
 List of decompiled functions and their addresses.
 
+## Main Executable
+
+Decompiled functions / Total functions: 13/339.
+
 | Address      | Function                                 |
 | ------------ | ---------------------------------------- |
 | `0x80010584` | `Geom_LoadMatrixAndVector`               |
