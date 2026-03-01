@@ -13,5 +13,7 @@ List of decompiled functions and their addresses.
 | `0x80012040` | `Sprite_RenderQueue`                     |
 | `0x80040178` | `Heap_Alloc`                             |
 | `0x80040044` | `Heap_MergeFreeBlocks`                   |
+| `0x8004e118` | `Sprite_ClearQueue`                      |
+| `0x8004e124` | `Sprite_FlushQueue`                      |
 | `0x80053638` | `Axe_InitChunkStream`                    |
 | `0x8005be80` | `Axe_ParseHeader`                        |

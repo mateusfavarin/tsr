@@ -234,3 +234,14 @@ void Sprite_RenderQueue(Sprite *sprites, s32 count)
         g_primMem = prim + 1;
     }
 }
+
+void Sprite_ClearQueue()
+{
+    g_spriteQueueSize = 0u;
+}
+
+void Sprite_FlushQueue()
+{
+    Sprite_RenderQueue(g_spriteQueue, g_spriteQueueSize);
+    g_spriteQueueSize = 0u;
+}

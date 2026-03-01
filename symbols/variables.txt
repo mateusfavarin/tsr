@@ -17,3 +17,5 @@ g_sinTable = 0x8009e8a8;
 g_cameraMatrix = 0x1f8003d4;
 g_otDepthLimit = 0x800a930c;
 g_spriteYScale = 0x800a8daa;
+g_spriteQueue = 0x800d9e38;
+g_spriteQueueSize = 0x800a90c8;

@@ -4,6 +4,8 @@
 #include "geom.h"
 #include "prim.h"
 
+#define SPRITE_QUEUE_SIZE 64
+
 typedef struct Sprite
 {
     SVec3 pos;
@@ -20,3 +22,5 @@ typedef struct Sprite
 } Sprite;
 
 void Sprite_RenderQueue(Sprite *sprites, s32 count);
+void Sprite_ClearQueue();
+void Sprite_FlushQueue();
