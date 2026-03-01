@@ -280,3 +280,13 @@ static force_inline void Prim_SetPolyG4(PrimCode *code)
     code->poly.gouraud = 1;
     code->poly.renderCode = RenderCode_Polygon;
 }
+
+static force_inline void Prim_SetPolyFT4(PrimCode *code)
+{
+    code->poly.rawTex = 0;
+    code->poly.semiTransparency = 0;
+    code->poly.textured = 1;
+    code->poly.quad = 1;
+    code->poly.gouraud = 0;
+    code->poly.renderCode = RenderCode_Polygon;
+}

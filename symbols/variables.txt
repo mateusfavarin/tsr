@@ -19,3 +19,5 @@ g_otDepthLimit = 0x800a930c;
 g_spriteYScale = 0x800a8daa;
 g_spriteQueue = 0x800d9e38;
 g_spriteQueueSize = 0x800a90c8;
+g_cameraPosCoarse = 0x1f8003c4;
+g_textureSlot = 0x800da610;

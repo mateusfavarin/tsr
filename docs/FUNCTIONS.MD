@@ -4,7 +4,7 @@ List of decompiled functions and their addresses.
 
 ## Main Executable
 
-Decompiled functions / Total functions: 13/339.
+Decompiled functions / Total functions: 14/339.
 
 | Address      | Function                                 |
 | ------------ | ---------------------------------------- |
@@ -19,5 +19,6 @@ Decompiled functions / Total functions: 13/339.
 | `0x80040044` | `Heap_MergeFreeBlocks`                   |
 | `0x8004e118` | `Sprite_ClearQueue`                      |
 | `0x8004e124` | `Sprite_FlushQueue`                      |
+| `0x8004e154` | `Sprite_AppendQueue`                     |
 | `0x80053638` | `Axe_InitChunkStream`                    |
 | `0x8005be80` | `Axe_ParseHeader`                        |

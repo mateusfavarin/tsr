@@ -9,6 +9,9 @@ typedef enum SpriteConstants
     SPRITE_NEGATE_LOW_WORD = 0x0000FFFF,
     SPRITE_NEGATE_HIGH_WORD = 0xFFFF0000,
     SPRITE_NEGATE_BOTH_WORDS = 0xFFFFFFFF,
+    SPRITE_APPEND_Y_RANGE_HALF = 10000,
+    SPRITE_APPEND_Y_RANGE_FULL = 20000,
+    SPRITE_APPEND_FLAG_WIDE_Y_RANGE = 0x0100,
 } SpriteConstants;
 
 typedef enum SpriteOrientFlags
@@ -229,6 +232,51 @@ void Sprite_RenderQueue(const Sprite *sprites, s32 count)
         SetPrimTag(prim, otTag);
         *otTagPtr = otTag;
         g_primMem = prim + 1;
+    }
+}
+
+void Sprite_AppendQueue(s32 x, s32 y, s32 z, s16 sizeX, s16 sizeY, u16 orientFlags, u16 angle, u8 u, u8 v,
+                        u8 texWidth, u8 texHeight, u8 red, u8 green, u8 blue, s32 textureSlot,
+                        u16 clutOffset, u32 flags, s16 otDepthBias)
+{
+    s32 relY = y - g_cameraPosCoarse.y;
+    const s32 relZ = z - g_cameraPosCoarse.z;
+    const s32 yRange = (flags & SPRITE_APPEND_FLAG_WIDE_Y_RANGE) ? (SPRITE_APPEND_Y_RANGE_FULL * 2) : (SPRITE_APPEND_Y_RANGE_HALF * 2);
+    const s32 yRangeHalf = (flags & SPRITE_APPEND_FLAG_WIDE_Y_RANGE) ? SPRITE_APPEND_Y_RANGE_FULL : SPRITE_APPEND_Y_RANGE_HALF;
+
+    if (relY + yRangeHalf > yRange) { return; }
+
+    Sprite *sprite = &g_spriteQueue[g_spriteQueueSize];
+    const TextureSlot *slot = &g_textureSlot[textureSlot];
+    const u16 tpageTransparencyFlags = flags & TEXPAGE_TRANSPARENCY_BITS;
+    const u16 tpage = slot->tpage + tpageTransparencyFlags;
+    const u16 clut = slot->clut + clutOffset;
+
+    sprite->pos.x = (s16) (x - g_cameraPosCoarse.x);
+    sprite->pos.y = (s16) relY;
+    sprite->pos.z = (s16) relZ;
+    sprite->otDepthBias = otDepthBias;
+    sprite->size.x = sizeX;
+    sprite->size.y = sizeY;
+    sprite->orientFlags = orientFlags;
+    sprite->angle = angle;
+    sprite->tpage = tpage;
+    sprite->clut = clut;
+    sprite->uv.u = u;
+    sprite->uv.v = v;
+    sprite->texWidth = texWidth;
+    sprite->texHeight = texHeight;
+    sprite->color.r = red;
+    sprite->color.g = green;
+    sprite->color.b = blue;
+    Prim_SetPolyFT4(&sprite->color.code);
+    if (tpageTransparencyFlags != TEXPAGE_TRANSPARENCY_OPAQUE) { sprite->color.code.poly.semiTransparency = 1; }
+
+    g_spriteQueueSize++;
+
+    if (g_spriteQueueSize >= SPRITE_QUEUE_SIZE)
+    {
+        Sprite_FlushQueue();
     }
 }
 

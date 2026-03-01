@@ -2,6 +2,7 @@
 
 #include "heap.h"
 #include "axe.h"
+#include "graphics.h"
 #include "math.h"
 #include "sprite.h"
 
@@ -26,12 +27,14 @@ extern s16 g_activeViewport_ClipMaxY;
 extern s16 g_sinTable[ANG_RANGE];
 
 extern Mat4 g_cameraMatrix;
+extern Vec3 g_cameraPosCoarse;
 
 extern s16 *g_depthToOTDepthLUT;
 extern s32 g_otDepthLimit;
 extern void *g_primMem;
 extern u8 *g_otPtr;
 extern u8 *g_primMemEnd;
+extern TextureSlot g_textureSlot[];
 
 extern u16 g_spriteYScale;
 extern Sprite g_spriteQueue[SPRITE_QUEUE_SIZE];
