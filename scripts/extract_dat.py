@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Extract TSR DAT meshes to OBJ.
-
-This script reads only the DAT file. It extracts:
-- meshes from the first geometry-header list
-- meshes from the second geometry-header list
-- meshes from the object table
-"""
+"""Extract TSR DAT meshes to OBJ (and optional RAW textures to MTL)."""
 
 from __future__ import annotations
 
@@ -16,12 +10,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
+import extract_raw as raw_extractor
+
 
 OBJ_SCALE = 4096.0
 LONG_QUAD_OPCODES = {0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E}
 LONG_TRI_OPCODES = {0x01, 0x03, 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F}
 SHORT_QUAD_OPCODES = {0x10, 0x12, 0x14, 0x16}
 SHORT_TRI_OPCODES = {0x11, 0x13, 0x15, 0x17}
+TEXTURED_LONG_OPCODES = LONG_QUAD_OPCODES | LONG_TRI_OPCODES
 
 
 @dataclass(frozen=True)
@@ -59,17 +56,40 @@ class DatObjectTransform:
 
 
 @dataclass(frozen=True)
+class MeshVertex:
+    x: int
+    y: int
+    z: int
+    color_555: int
+
+
+@dataclass(frozen=True)
+class MeshFace:
+    indices: Tuple[int, ...]
+    uv: Optional[Tuple[Tuple[int, int], ...]]
+    texture_slot: Optional[int]
+
+
+@dataclass(frozen=True)
 class MeshData:
     offset: int
-    vertices: List[Tuple[int, int, int]]
-    faces: List[Tuple[int, ...]]
+    vertices: List[MeshVertex]
+    faces: List[MeshFace]
 
 
 @dataclass(frozen=True)
 class ObjPart:
     name: str
-    vertices: List[Tuple[float, float, float]]
-    faces: List[Tuple[int, ...]]
+    vertices: List[Tuple[float, float, float, float, float, float]]
+    faces: List[MeshFace]
+
+
+@dataclass(frozen=True)
+class RawTextureInfo:
+    slot: int
+    path: Path
+    width: int
+    height: int
 
 
 @dataclass(frozen=True)
@@ -143,20 +163,29 @@ def apply_axis_scale(matrix: List[List[float]], scale: Tuple[int, int, int]) -> 
     ]
 
 
+def psx_color_555_to_rgb(value: int) -> Tuple[float, float, float]:
+    r5 = value & 0x1F
+    g5 = (value >> 5) & 0x1F
+    b5 = (value >> 10) & 0x1F
+    return (r5 / 31.0, g5 / 31.0, b5 / 31.0)
+
+
 def transform_vertices(
-    local_vertices: Sequence[Tuple[int, int, int]],
+    local_vertices: Sequence[MeshVertex],
     pos: Tuple[int, int, int],
     rot: Tuple[int, int, int],
     scale: Tuple[int, int, int],
-) -> List[Tuple[float, float, float]]:
+) -> List[Tuple[float, float, float, float, float, float]]:
     matrix = apply_axis_scale(build_rotation_matrix(rot), scale)
-    out: List[Tuple[float, float, float]] = []
+    out: List[Tuple[float, float, float, float, float, float]] = []
 
-    for local_x, local_y, local_z in local_vertices:
+    for vertex in local_vertices:
+        local_x, local_y, local_z = vertex.x, vertex.y, vertex.z
         world_x = pos[0] + matrix[0][0] * local_x + matrix[0][1] * local_y + matrix[0][2] * local_z
         world_y = pos[1] + matrix[1][0] * local_x + matrix[1][1] * local_y + matrix[1][2] * local_z
         world_z = pos[2] + matrix[2][0] * local_x + matrix[2][1] * local_y + matrix[2][2] * local_z
-        out.append((world_x / OBJ_SCALE, world_y / OBJ_SCALE, world_z / OBJ_SCALE))
+        r, g, b = psx_color_555_to_rgb(vertex.color_555)
+        out.append((world_x / OBJ_SCALE, world_y / OBJ_SCALE, world_z / OBJ_SCALE, r, g, b))
 
     return out
 
@@ -337,23 +366,26 @@ def parse_mesh_stream(data: bytes, offset: int) -> Optional[MeshData]:
     if not align_ok(data, vertex_offset, vertex_block_size):
         return None
 
-    vertices: List[Tuple[int, int, int]] = []
+    vertices: List[MeshVertex] = []
     for vertex_index in range(vertex_count):
         local_offset = vertex_offset + vertex_index * 8
         vertices.append(
-            (
-                read_s16(data, local_offset + 0x00),
-                read_s16(data, local_offset + 0x02),
-                read_s16(data, local_offset + 0x04),
+            MeshVertex(
+                x=read_s16(data, local_offset + 0x00),
+                y=read_s16(data, local_offset + 0x02),
+                z=read_s16(data, local_offset + 0x04),
+                color_555=read_u16(data, local_offset + 0x06),
             )
         )
 
-    faces: List[Tuple[int, ...]] = []
+    faces: List[MeshFace] = []
     cursor = command_offset
     saw_terminator = False
+    current_texture_slot: Optional[int] = None
 
     while align_ok(data, cursor, 4):
         opcode = read_u16(data, cursor + 0x00)
+        opcode_signed = read_s16(data, cursor + 0x00)
         command = read_u16(data, cursor + 0x02)
 
         if opcode == 0xFFFF:
@@ -387,18 +419,52 @@ def parse_mesh_stream(data: bytes, offset: int) -> Optional[MeshData]:
         if not align_ok(data, payload_offset, payload_size):
             return None
 
+        if opcode_signed >= 0:
+            # Matches game decode: slot comes from opcode bits 8..12.
+            current_texture_slot = (opcode >> 8) & 0x1F
+
+        texture_slot = current_texture_slot if family in TEXTURED_LONG_OPCODES else None
         for primitive_index in range(primitive_count):
-            packed = read_u32(data, payload_offset + primitive_index * primitive_stride)
+            primitive_base = payload_offset + primitive_index * primitive_stride
+            packed = read_u32(data, primitive_base + 0x00)
             indices = (
                 packed & 0xFF,
                 (packed >> 8) & 0xFF,
                 (packed >> 16) & 0xFF,
                 (packed >> 24) & 0xFF,
             )
-            face = indices[:vertices_per_face]
-            if any(index >= vertex_count for index in face):
+            face_indices = indices[:vertices_per_face]
+            if any(index >= vertex_count for index in face_indices):
                 return None
-            faces.append(face)
+
+            face_uv: Optional[Tuple[Tuple[int, int], ...]] = None
+            if family in TEXTURED_LONG_OPCODES:
+                uv01 = read_u32(data, primitive_base + 0x04)
+                uv23 = read_u32(data, primitive_base + 0x08)
+                if vertices_per_face == 4:
+                    uv4 = (
+                        (uv01 & 0xFF, (uv01 >> 8) & 0xFF),
+                        ((uv01 >> 16) & 0xFF, (uv01 >> 24) & 0xFF),
+                        (uv23 & 0xFF, (uv23 >> 8) & 0xFF),
+                        ((uv23 >> 16) & 0xFF, (uv23 >> 24) & 0xFF),
+                    )
+                    face_uv = uv4
+                else:
+                    # Matches game decode for long textured triangles:
+                    # uv0 comes from uv01 high 16 bits, uv1/uv2 from uv23.
+                    face_uv = (
+                        ((uv01 >> 16) & 0xFF, (uv01 >> 24) & 0xFF),
+                        (uv23 & 0xFF, (uv23 >> 8) & 0xFF),
+                        ((uv23 >> 16) & 0xFF, (uv23 >> 24) & 0xFF),
+                    )
+
+            faces.append(
+                MeshFace(
+                    indices=face_indices,
+                    uv=face_uv,
+                    texture_slot=texture_slot,
+                )
+            )
 
         cursor = payload_offset + payload_size
 
@@ -408,9 +474,75 @@ def parse_mesh_stream(data: bytes, offset: int) -> Optional[MeshData]:
     return MeshData(offset=offset, vertices=vertices, faces=faces)
 
 
-def write_obj(parts: Sequence[ObjPart], output_path: Path) -> None:
+def extract_raw_textures(raw_path: Path, texture_dir: Path) -> Dict[int, RawTextureInfo]:
+    raw_data = raw_path.read_bytes()
+    chunks = raw_extractor.iterate_chunks(raw_data)
+    texture_dir.mkdir(parents=True, exist_ok=True)
+
+    textures: Dict[int, RawTextureInfo] = {}
+    for chunk in chunks:
+        cmd = chunk.command_id
+        if cmd < 0 or cmd >= 0x20:
+            continue
+
+        output_png = texture_dir / f"tex_{cmd:02X}.png"
+        ok, _ = raw_extractor.extract_indexed_packet(
+            chunk.packet,
+            cmd,
+            output_png,
+            0x0C,
+            0x04,
+            0x06,
+            0x08,
+            0x0A,
+        )
+        if not ok:
+            continue
+
+        width = raw_extractor.read_le_u16(chunk.packet, 0x04)
+        height = abs(raw_extractor.read_le_s16(chunk.packet, 0x06))
+        if width <= 0:
+            width = 256
+        if height <= 0:
+            height = 256
+
+        if cmd not in textures:
+            textures[cmd] = RawTextureInfo(slot=cmd, path=output_png, width=width, height=height)
+
+    return textures
+
+
+def write_mtl(
+    mtl_path: Path,
+    texture_dir: Path,
+    texture_info_by_slot: Dict[int, RawTextureInfo],
+    used_texture_slots: Sequence[int],
+) -> None:
     lines: List[str] = []
+    for slot in used_texture_slots:
+        material_name = f"tex_{slot:02X}"
+        lines.append(f"newmtl {material_name}")
+        lines.append("Kd 1.000000 1.000000 1.000000")
+        info = texture_info_by_slot.get(slot)
+        if info is not None:
+            lines.append(f"map_Kd {texture_dir.name}/{info.path.name}")
+        lines.append("")
+
+    mtl_path.write_text("\n".join(lines).rstrip() + "\n", encoding="ascii")
+
+
+def write_obj(
+    parts: Sequence[ObjPart],
+    output_path: Path,
+    texture_info_by_slot: Optional[Dict[int, RawTextureInfo]] = None,
+    mtl_path: Optional[Path] = None,
+) -> List[int]:
+    lines: List[str] = []
+    used_texture_slots: set[int] = set()
+    if mtl_path is not None:
+        lines.append(f"mtllib {mtl_path.name}")
     next_vertex = 1
+    next_texcoord = 1
 
     for part in parts:
         if not part.vertices or not part.faces:
@@ -419,15 +551,44 @@ def write_obj(parts: Sequence[ObjPart], output_path: Path) -> None:
         lines.append(f"o {part.name}")
         base_vertex = next_vertex
 
-        for x, y, z in part.vertices:
-            lines.append(f"v {x:.6f} {y:.6f} {z:.6f}")
+        for x, y, z, r, g, b in part.vertices:
+            lines.append(f"v {x:.6f} {y:.6f} {z:.6f} {r:.6f} {g:.6f} {b:.6f}")
         next_vertex += len(part.vertices)
 
+        current_material: Optional[str] = None
         for face in part.faces:
-            obj_indices = [str(base_vertex + index) for index in face]
-            lines.append(f"f {' '.join(obj_indices)}")
+            obj_indices = [base_vertex + index for index in face.indices]
+            if face.uv is not None and face.texture_slot is not None:
+                material_name = f"tex_{face.texture_slot:02X}"
+                used_texture_slots.add(face.texture_slot)
+                if mtl_path is not None and material_name != current_material:
+                    lines.append(f"usemtl {material_name}")
+                    current_material = material_name
+
+                width = 256
+                height = 256
+                if texture_info_by_slot is not None and face.texture_slot in texture_info_by_slot:
+                    info = texture_info_by_slot[face.texture_slot]
+                    width = max(1, info.width)
+                    height = max(1, info.height)
+
+                texcoord_indices: List[int] = []
+                for u, v in face.uv:
+                    u_norm = u / float(width)
+                    v_norm = 1.0 - (v / float(height))
+                    lines.append(f"vt {u_norm:.6f} {v_norm:.6f}")
+                    texcoord_indices.append(next_texcoord)
+                    next_texcoord += 1
+
+                face_tokens = [
+                    f"{obj_indices[i]}/{texcoord_indices[i]}" for i in range(len(obj_indices))
+                ]
+                lines.append(f"f {' '.join(face_tokens)}")
+            else:
+                lines.append(f"f {' '.join(str(index) for index in obj_indices)}")
 
     output_path.write_text("\n".join(lines) + "\n", encoding="ascii")
+    return sorted(used_texture_slots)
 
 
 def extract_dat(path: Path) -> Tuple[List[ObjPart], ExtractionStats]:
@@ -508,16 +669,48 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Extract TSR DAT geometry to OBJ.")
     parser.add_argument("input_dat", type=Path, help="Path to the input .DAT file")
     parser.add_argument("output_obj", type=Path, nargs="?", help="Path to the output .OBJ file")
+    parser.add_argument(
+        "--raw",
+        type=Path,
+        help="Optional RAW path. When set, extract texture PNGs and emit MTL + UV-mapped OBJ faces.",
+    )
     args = parser.parse_args()
 
     input_path = args.input_dat
     output_path = args.output_obj if args.output_obj else input_path.with_suffix(".obj")
 
     parts, stats = extract_dat(input_path)
-    write_obj(parts, output_path)
+    texture_info_by_slot: Optional[Dict[int, RawTextureInfo]] = None
+    mtl_path: Optional[Path] = None
+    texture_dir: Optional[Path] = None
+    if args.raw is not None:
+        texture_dir = output_path.parent / f"{output_path.stem}_textures"
+        texture_info_by_slot = extract_raw_textures(args.raw, texture_dir)
+        mtl_path = output_path.with_suffix(".mtl")
+
+    used_texture_slots = write_obj(
+        parts,
+        output_path,
+        texture_info_by_slot=texture_info_by_slot,
+        mtl_path=mtl_path,
+    )
+    if mtl_path is not None and texture_dir is not None:
+        write_mtl(
+            mtl_path,
+            texture_dir,
+            texture_info_by_slot or {},
+            used_texture_slots,
+        )
 
     print(f"input: {input_path}")
     print(f"output: {output_path}")
+    if args.raw is not None:
+        print(f"raw: {args.raw}")
+        if texture_dir is not None:
+            print(f"textures: {texture_dir}")
+        if mtl_path is not None:
+            print(f"mtl: {mtl_path}")
+        print(f"materials_used: {len(used_texture_slots)}")
     print(f"first_geometry_header_meshes: {stats.first_geometry_header_meshes}")
     print(f"second_geometry_header_meshes: {stats.second_geometry_header_meshes}")
     print(f"objects: {stats.object_meshes}")
