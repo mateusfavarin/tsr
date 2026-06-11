@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define force_inline inline __attribute__((always_inline))
-#define nullptr ((void *) 0)
+#define nullptr ((void*) 0)
 
 typedef uint64_t u64;
 typedef int64_t  s64;

@@ -1,13 +1,13 @@
 #include <geom.h>
 #include <inline_gte.h>
 
-void Geom_LoadMatrixAndVector(const Mat3 *matrix, const Vec3 *vector)
+void Geom_LoadMatrixAndVector(const Mat3* matrix, const Vec3* vector)
 {
     gte_SetLightMatrix(matrix);
     gte_ldbkdir(vector->x, vector->y, vector->z);
 }
 
-void Geom_ApplyVectorTransform_InPlace(const Vec3 *input, Vec3 *output)
+void Geom_ApplyVectorTransform_InPlace(const Vec3* input, Vec3* output)
 {
     gte_loadVec(input, GTE_VECTOR_IR);
     gte_llirbk();
@@ -16,7 +16,7 @@ void Geom_ApplyVectorTransform_InPlace(const Vec3 *input, Vec3 *output)
     gte_SetTransVector(output);
 }
 
-void Geom_ApplyMatrixScaleTransform_InPlace(const SVec3 *scale, const Mat3 *source, Mat3 *destination)
+void Geom_ApplyMatrixScaleTransform_InPlace(const SVec3* scale, const Mat3* source, Mat3* destination)
 {
     Vec3 transformedRows[3];
     const Mat3 scaleMatrix =
@@ -47,7 +47,7 @@ void Geom_ApplyMatrixScaleTransform_InPlace(const SVec3 *scale, const Mat3 *sour
     gte_SetRotMatrix(destination);
 }
 
-void Geom_ApplyMatrixTransform_InPlace(const Mat3 *source, Mat3 *destination)
+void Geom_ApplyMatrixTransform_InPlace(const Mat3* source, Mat3* destination)
 {
     Vec3 transformedColumns[3];
     SVec3 sourceColumn;
@@ -77,7 +77,7 @@ void Geom_ApplyMatrixTransform_InPlace(const Mat3 *source, Mat3 *destination)
     gte_SetRotMatrix(destination);
 }
 
-void Geom_ApplyMatrixTransform(const Mat3 *source, Mat3 *destination)
+void Geom_ApplyMatrixTransform(const Mat3* source, Mat3* destination)
 {
     Vec3 transformedColumns[3];
     SVec3 sourceColumn;

@@ -32,7 +32,7 @@ static force_inline SVec3 Sprite_PackedXYToVec(Point point)
     return out;
 }
 
-static force_inline bool Sprite_HasAnyVisibleScreenPointY(const PointQuad *screenPoints)
+static force_inline bool Sprite_HasAnyVisibleScreenPointY(const PointQuad* screenPoints)
 {
     if (screenPoints->p[0].y < GRAPHICS_SCREEN_HEIGHT) { return true; }
     if (screenPoints->p[1].y < GRAPHICS_SCREEN_HEIGHT) { return true; }
@@ -40,7 +40,7 @@ static force_inline bool Sprite_HasAnyVisibleScreenPointY(const PointQuad *scree
     return screenPoints->p[3].y < GRAPHICS_SCREEN_HEIGHT;
 }
 
-static force_inline bool Sprite_HasAnyVisibleScreenPointX(const PointQuad *screenPoints)
+static force_inline bool Sprite_HasAnyVisibleScreenPointX(const PointQuad* screenPoints)
 {
     if (screenPoints->p[0].x < GRAPHICS_SCREEN_WIDTH) { return true; }
     if (screenPoints->p[1].x < GRAPHICS_SCREEN_WIDTH) { return true; }
@@ -48,15 +48,15 @@ static force_inline bool Sprite_HasAnyVisibleScreenPointX(const PointQuad *scree
     return screenPoints->p[3].x < GRAPHICS_SCREEN_WIDTH;
 }
 
-static void Sprite_BuildCorners(const Sprite *sprite, PointQuad *corners)
+static void Sprite_BuildCorners(const Sprite* sprite, PointQuad* corners)
 {
     const u32 orientFlags = sprite->orientFlags;
     const u32 packedSize = sprite->size.self;
     const u32 orientMode = orientFlags & SPRITE_ORIENT_MASK;
-    Point *v0Rtpt = &corners->p[0];
-    Point *v1Rtpt = &corners->p[1];
-    Point *v2Rtpt = &corners->p[2];
-    Point *v0Rtps = &corners->p[3];
+    Point* v0Rtpt = &corners->p[0];
+    Point* v1Rtpt = &corners->p[1];
+    Point* v2Rtpt = &corners->p[2];
+    Point* v0Rtps = &corners->p[3];
 
     if (orientMode == 0)
     {
@@ -149,18 +149,18 @@ static void Sprite_BuildRotationMatrix(u16 angle, s32 spriteYScale, Mat3 *rotati
     rotation->m[2][0] = 0; rotation->m[2][1] = 0; rotation->m[2][2] = FP_ONE;
 }
 
-void Sprite_RenderQueue(const Sprite *sprites, s32 count)
+void Sprite_RenderQueue(const Sprite* sprites, s32 count)
 {
     const s32 spriteYScale = (s32) g_spriteYScale;
     const s32 depthLimitBytes = g_otDepthLimit << 2;
-    const u8 *const primLimit = g_primMemEnd - sizeof(PolyFT4);
+    const u8* const primLimit = g_primMemEnd - sizeof(PolyFT4);
     Mat3 rotation = { 0 };
 
-    gte_SetColorMatrix((void *) &g_cameraMatrix);
+    gte_SetColorMatrix((void*) &g_cameraMatrix);
 
     for (s32 i = 0; i < count; i++)
     {
-        const Sprite *sprite = &sprites[i];
+        const Sprite* sprite = &sprites[i];
         PointQuad corners;
         PointQuad screenPoints;
         Vec3 transformedCenter;
@@ -207,9 +207,9 @@ void Sprite_RenderQueue(const Sprite *sprites, s32 count)
         if (depthByteOffset >= depthLimitBytes) { continue; }
 
         const u16 otOffset = g_depthToOTDepthLUT[(u32) (depthByteOffset >> 2)];
-        u32 *otTagPtr = (u32 *) (g_otPtr + otOffset);
+        u32* otTagPtr = (u32*) (g_otPtr + otOffset);
         u32 otTag = *otTagPtr;
-        PolyFT4 *prim = (PolyFT4 *) g_primMem;
+        PolyFT4 *prim = (PolyFT4*) g_primMem;
 
         const u8 u0 = sprite->uv.u; const u8 v0 = sprite->uv.v;
         const u8 u1 = u0 + sprite->texWidth; const u8 v1 = v0;
@@ -246,8 +246,8 @@ void Sprite_AppendQueue(s32 x, s32 y, s32 z, s16 sizeX, s16 sizeY, u16 orientFla
 
     if (relY + yRangeHalf > yRange) { return; }
 
-    Sprite *sprite = &g_spriteQueue[g_spriteQueueSize];
-    const TextureSlot *slot = &g_textureSlot[textureSlot];
+    Sprite* sprite = &g_spriteQueue[g_spriteQueueSize];
+    const TextureSlot* slot = &g_textureSlot[textureSlot];
     const u16 tpageTransparencyFlags = flags & TEXPAGE_TRANSPARENCY_BITS;
     const u16 tpage = slot->tpage + tpageTransparencyFlags;
     const u16 clut = slot->clut + clutOffset;

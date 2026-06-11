@@ -42,7 +42,7 @@ typedef struct Mat4
     Vec3 t;
 } Mat4;
 
-static force_inline void Geom_SetMatrixByRow(Mat3 *matrix, const Vec3 rows[3])
+static force_inline void Geom_SetMatrixByRow(Mat3* matrix, const Vec3 rows[3])
 {
     for (u32 i = 0; i < 3; i++)
     {
@@ -53,7 +53,7 @@ static force_inline void Geom_SetMatrixByRow(Mat3 *matrix, const Vec3 rows[3])
     }
 }
 
-static force_inline void Geom_SetMatrixByCol(Mat3 *matrix, const Vec3 cols[3])
+static force_inline void Geom_SetMatrixByCol(Mat3* matrix, const Vec3 cols[3])
 {
     for (u32 i = 0; i < 3; i++)
     {
@@ -64,8 +64,8 @@ static force_inline void Geom_SetMatrixByCol(Mat3 *matrix, const Vec3 cols[3])
     }
 }
 
-void Geom_LoadMatrixAndVector(const Mat3 *matrix, const Vec3 *vector);
-void Geom_ApplyVectorTransform_InPlace(const Vec3 *input, Vec3 *output);
-void Geom_ApplyMatrixScaleTransform_InPlace(const SVec3 *scale, const Mat3 *source, Mat3 *destination);
-void Geom_ApplyMatrixTransform_InPlace(const Mat3 *source, Mat3 *destination);
-void Geom_ApplyMatrixTransform(const Mat3 *source, Mat3 *destination);
+void Geom_LoadMatrixAndVector(const Mat3* matrix, const Vec3* vector);
+void Geom_ApplyVectorTransform_InPlace(const Vec3* input, Vec3* output);
+void Geom_ApplyMatrixScaleTransform_InPlace(const SVec3* scale, const Mat3* source, Mat3* destination);
+void Geom_ApplyMatrixTransform_InPlace(const Mat3* source, Mat3* destination);
+void Geom_ApplyMatrixTransform(const Mat3* source, Mat3* destination);

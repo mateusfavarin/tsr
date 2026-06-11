@@ -12,7 +12,7 @@ typedef struct AxeOcclusionQuad
 typedef struct AxeFace
 {
     s16 v[4];
-    u8 *pSkipFaceFlag;
+    u8* pSkipFaceFlag;
 } AxeFace;
 
 typedef struct AxeVertex
@@ -24,8 +24,8 @@ typedef struct AxeVertex
 
 typedef struct AxeChunk
 {
-    AxeVertex *pVertices;
-    AxeFace *pFace;
+    AxeVertex* pVertices;
+    AxeFace* pFace;
     u32 field_0x08;
     AxeOcclusionQuad cull;
     s16 colorSwapCount;
