@@ -163,10 +163,11 @@ def apply_axis_scale(matrix: List[List[float]], scale: Tuple[int, int, int]) -> 
     ]
 
 
-def psx_color_555_to_rgb(value: int) -> Tuple[float, float, float]:
-    r5 = value & 0x1F
+def dat_color_555_to_rgb(value: int) -> Tuple[float, float, float]:
+    # The game expands DAT vertex colors as BGR555 before writing PSX primitive RGB bytes.
+    r5 = (value >> 10) & 0x1F
     g5 = (value >> 5) & 0x1F
-    b5 = (value >> 10) & 0x1F
+    b5 = value & 0x1F
     return (r5 / 31.0, g5 / 31.0, b5 / 31.0)
 
 
@@ -184,7 +185,7 @@ def transform_vertices(
         world_x = pos[0] + matrix[0][0] * local_x + matrix[0][1] * local_y + matrix[0][2] * local_z
         world_y = pos[1] + matrix[1][0] * local_x + matrix[1][1] * local_y + matrix[1][2] * local_z
         world_z = pos[2] + matrix[2][0] * local_x + matrix[2][1] * local_y + matrix[2][2] * local_z
-        r, g, b = psx_color_555_to_rgb(vertex.color_555)
+        r, g, b = dat_color_555_to_rgb(vertex.color_555)
         out.append((world_x / OBJ_SCALE, world_y / OBJ_SCALE, world_z / OBJ_SCALE, r, g, b))
 
     return out
