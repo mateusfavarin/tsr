@@ -197,7 +197,7 @@ Current evidence only covers the common positive `vertexCount` path. No negative
 | `0x00` | `0x02` | `s16` | `x` |
 | `0x02` | `0x02` | `s16` | `y` |
 | `0x04` | `0x02` | `s16` | `z` |
-| `0x06` | `0x02` | `u16` | packed color / pad |
+| `0x06` | `0x02` | `u16` | packed vertex color, BGR555 |
 
 The renderer treats each entry as an `SVECTOR`; the final halfword is read separately for packed vertex color data.
 
